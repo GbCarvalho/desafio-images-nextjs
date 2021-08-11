@@ -2,13 +2,41 @@ import { Button, Box } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { useInfiniteQuery } from 'react-query';
 
+import { AxiosResponse } from 'axios';
 import { Header } from '../components/Header';
 import { CardList } from '../components/CardList';
 import { api } from '../services/api';
 import { Loading } from '../components/Loading';
 import { Error } from '../components/Error';
 
+type Image = {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  ts: number;
+};
+
+type ApiResponseProps = {
+  data: Image[];
+  after: string;
+};
+
+type fetchImagesParams = {
+  pageParam?: number;
+};
+
 export default function Home(): JSX.Element {
+  const fetchImages = async ({
+    pageParam = null,
+  }: fetchImagesParams): Promise<AxiosResponse<ApiResponseProps>> => {
+    const response = await api.get(
+      pageParam !== null ? `api/images?after=${pageParam}` : `api/images`
+    );
+
+    return response;
+  };
+
   const {
     data,
     isLoading,
@@ -16,16 +44,11 @@ export default function Home(): JSX.Element {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery(
-    'images',
-    // TODO AXIOS REQUEST WITH PARAM
-    ,
-    // TODO GET AND RETURN NEXT PAGE PARAM
-  );
+  } = useInfiniteQuery('images', fetchImages, {
+    getNextPageParam: (lastPage, _) => {},
+  });
 
-  const formattedData = useMemo(() => {
-    // TODO FORMAT AND FLAT DATA ARRAY
-  }, [data]);
+  const formattedData = useMemo(() => {}, [data]);
 
   // TODO RENDER LOADING SCREEN
 
