@@ -10,11 +10,15 @@ import { Loading } from '../components/Loading';
 import { Error } from '../components/Error';
 
 type Image = {
-  id: string;
-  title: string;
-  description: string;
-  url: string;
+  data: {
+    title: string;
+    description: string;
+    url: string;
+  };
   ts: number;
+  ref: {
+    id: string;
+  };
 };
 
 type ApiResponseProps = {
@@ -22,19 +26,17 @@ type ApiResponseProps = {
   after: string;
 };
 
-type fetchImagesParams = {
-  pageParam?: number;
-};
-
 export default function Home(): JSX.Element {
   const fetchImages = async ({
     pageParam = null,
-  }: fetchImagesParams): Promise<AxiosResponse<ApiResponseProps>> => {
+  }): Promise<AxiosResponse<ApiResponseProps>> => {
+    console.log(pageParam);
+
     const response = await api.get(
       pageParam !== null ? `api/images?after=${pageParam}` : `api/images`
     );
 
-    return response;
+    return response.data;
   };
 
   const {
@@ -45,14 +47,43 @@ export default function Home(): JSX.Element {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery('images', fetchImages, {
-    getNextPageParam: (lastPage, _) => {},
+    getNextPageParam: lastPage => {
+      return lastPage.data.after ? lastPage.data.after : null;
+    },
   });
 
-  const formattedData = useMemo(() => {}, [data]);
+  const formattedData = useMemo(() => {
+    if (data) {
+      if (data.pages) {
+        data.pages
+          .map(page => {
+            if (page.data.data) {
+              return page.data.data.map(image => {
+                return {
+                  title: image.data.title,
+                  description: image.data.description,
+                  url: image.data.url,
+                  ts: image.ts,
+                  id: image.ref.id,
+                };
+              });
+            }
+          })
+          .flat();
+      }
+    }
+    return null;
+  }, [data]);
 
   // TODO RENDER LOADING SCREEN
+  // if (isLoading) {
+  //   return <Loading />;
+  // }
 
-  // TODO RENDER ERROR SCREEN
+  // // TODO RENDER ERROR SCREEN
+  // if (isError) {
+  //   return <Error />;
+  // }
 
   return (
     <>
@@ -60,7 +91,15 @@ export default function Home(): JSX.Element {
 
       <Box maxW={1120} px={20} mx="auto" my={20}>
         <CardList cards={formattedData} />
-        {/* TODO RENDER LOAD MORE BUTTON IF DATA HAS NEXT PAGE */}
+        {hasNextPage && (
+          <Button
+            onClick={() => {
+              fetchNextPage();
+            }}
+          />
+        )}
+
+        {isFetchingNextPage && 'Carregando ...'}
       </Box>
     </>
   );
