@@ -61,14 +61,14 @@ export default function Home(): JSX.Element {
   }, [data]);
 
   // TODO RENDER LOADING SCREEN
-  // if (isLoading) {
-  //   return <Loading />;
-  // }
+  if (isLoading) {
+    return <Loading />;
+  }
 
-  // // TODO RENDER ERROR SCREEN
-  // if (isError) {
-  //   return <Error />;
-  // }
+  // TODO RENDER ERROR SCREEN
+  if (isError) {
+    return <Error />;
+  }
 
   return (
     <>
@@ -76,15 +76,20 @@ export default function Home(): JSX.Element {
 
       <Box maxW={1120} px={20} mx="auto" my={20}>
         <CardList cards={formattedData} />
-        {hasNextPage && (
+        {hasNextPage && !isFetchingNextPage && (
           <Button
             onClick={() => {
               fetchNextPage();
             }}
-          />
+            mt="10"
+          >
+            Carregar mais
+          </Button>
         )}
 
         {isFetchingNextPage && 'Carregando ...'}
+
+        {}
       </Box>
     </>
   );
