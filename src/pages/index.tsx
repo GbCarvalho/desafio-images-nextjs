@@ -2,8 +2,6 @@ import { Button, Box } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { useInfiniteQuery } from 'react-query';
 
-import { AxiosResponse } from 'axios';
-import { IncomingMessage } from 'http';
 import { Header } from '../components/Header';
 import { CardList } from '../components/CardList';
 import { api } from '../services/api';
@@ -76,20 +74,20 @@ export default function Home(): JSX.Element {
 
       <Box maxW={1120} px={20} mx="auto" my={20}>
         <CardList cards={formattedData} />
+
         {hasNextPage && !isFetchingNextPage && (
           <Button
             onClick={() => {
               fetchNextPage();
             }}
             mt="10"
+            name="Carregar mais"
           >
             Carregar mais
           </Button>
         )}
 
-        {isFetchingNextPage && 'Carregando ...'}
-
-        {}
+        {isFetchingNextPage && <Loading />}
       </Box>
     </>
   );
