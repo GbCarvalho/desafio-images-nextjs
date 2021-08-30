@@ -33,7 +33,7 @@ export function CardList({ cards }: CardsProps): JSX.Element {
 
   return (
     <>
-      <SimpleGrid columns={[2, null, 3]} spacing="40px">
+      <SimpleGrid columns={3} spacing="40px">
         {cards.map(card => (
           <Card data={card} viewImage={handleViewImage} />
         ))}

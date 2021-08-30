@@ -97,7 +97,7 @@ export function FormAddImage({ closeModal }: FormAddImageProps): JSX.Element {
       }
 
       // TODO EXECUTE ASYNC MUTATION
-      mutation.mutate({
+      await mutation.mutateAsync({
         description: data.description,
         title: data.title,
       });

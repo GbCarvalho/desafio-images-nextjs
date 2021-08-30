@@ -1,4 +1,4 @@
-import { Button, Box } from '@chakra-ui/react';
+import { Button, Box, Text } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { useInfiniteQuery } from 'react-query';
 
@@ -25,9 +25,11 @@ export default function Home(): JSX.Element {
   const fetchImages = async ({
     pageParam = null,
   }): Promise<ApiResponseProps> => {
-    const response = await api.get(
-      pageParam !== null ? `api/images?after=${pageParam}` : `api/images`
-    );
+    const response = await api.get(`api/images`, {
+      params: {
+        after: pageParam,
+      },
+    });
 
     return response.data;
   };
@@ -37,12 +39,14 @@ export default function Home(): JSX.Element {
     isLoading,
     isError,
     isFetchingNextPage,
+    isFetching,
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery('images', fetchImages, {
     getNextPageParam: lastPage => {
       return lastPage.after ? lastPage.after : null;
     },
+    staleTime: Infinity,
   });
 
   const formattedData = useMemo(() => {
@@ -58,12 +62,10 @@ export default function Home(): JSX.Element {
     return null;
   }, [data]);
 
-  // TODO RENDER LOADING SCREEN
   if (isLoading) {
     return <Loading />;
   }
 
-  // TODO RENDER ERROR SCREEN
   if (isError) {
     return <Error />;
   }
@@ -81,13 +83,12 @@ export default function Home(): JSX.Element {
               fetchNextPage();
             }}
             mt="10"
-            name="Carregar mais"
           >
             Carregar mais
           </Button>
         )}
 
-        {isFetchingNextPage && <Loading />}
+        {isFetchingNextPage && isFetching && <Text mt="10">Carregando...</Text>}
       </Box>
     </>
   );
